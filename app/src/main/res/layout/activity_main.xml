@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
@@ -16,15 +15,32 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="100dp"
         android:layout_marginVertical="20dp"
-        android:text="调光手电筒"
+        android:text="@string/app_name"
         android:textAlignment="center"
         android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/flashInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="16dp"
+        android:autoLink="web"
+        android:text="@string/app_name"
+        android:textSize="14sp" />
+
+    <Spinner
+        android:id="@+id/cameraSelector"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="16dp"
+        android:textAlignment="center" />
 
     <SeekBar
         android:id="@+id/seekBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="100dp" />
+        android:layout_marginHorizontal="100dp"
+        android:min="0" />
 
     <SeekBar
         android:id="@+id/seekBar2"
@@ -41,6 +57,6 @@
         android:id="@+id/tvProgress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Off" />
+        android:text="@string/off" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>
