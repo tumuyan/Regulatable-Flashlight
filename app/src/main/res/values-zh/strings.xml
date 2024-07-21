@@ -4,4 +4,6 @@
     <string name="off">已关闭</string>
     <string name="info">Android 13 或更高版本的设备中，系统（可能）提供了控制手电筒亮度的API。这是一个使用此功能的简易演示程序，可以通过下拉选择手电筒，并通过滑动滑块选择手电筒的亮度。如果你的设备不支持此功能，则无法通过此应用打开手电筒。\n参考文档 https://source.android.google.cn/docs/core/camera/torch-strength-control\n\nby tumuyan in 2024.7
     </string>
+    <string name="not_support">此闪光灯不支持亮度控制功能</string>
+    <string name="may_not_support">已关闭\n此闪光灯可能不支持亮度控制</string>
 </resources>

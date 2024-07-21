@@ -31,14 +31,11 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "FlashlightTest";
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
-    private static final int TORCH_DURATION_MS = 1000;
-    private static final int TORCH_TIMEOUT_MS = 3000;
-    private static final int NUM_REGISTERS = 10;
 
     private ArrayList<String> mFlashCameraIdList;
     private ArrayList<String> mNoFlashCameraIdList;
     private ArrayList<String> mFlashCameraInfoList;
+    private ArrayList<Integer> mFlashStrengthMaxList;
     private String cameraId;
 
     private CameraManager mCameraManager;
@@ -61,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         mFlashCameraIdList = new ArrayList<>();
         mNoFlashCameraIdList = new ArrayList<>();
         mFlashCameraInfoList = new ArrayList<>();
+        mFlashStrengthMaxList = new ArrayList<>();
         mCameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
 
         seekBar = findViewById(R.id.seekBar);
@@ -75,15 +73,10 @@ public class MainActivity extends AppCompatActivity {
         try {
 
             String[] cameraIdList = mCameraManager.getCameraIdList();
-            mFlashCameraIdList.clear();
-            mNoFlashCameraIdList.clear();
-            mFlashCameraInfoList.clear();
-//            mFlashCameraInfoList.add("选择闪光灯");
+
             int index = 0;
             int bestCameraIndex = -1;
             int bestCameraScore = 0;
-
-//            StringBuffer buffer = new StringBuffer("");
 
             for (String id : cameraIdList) {
                 CameraCharacteristics characteristics = mCameraManager.getCameraCharacteristics(id);
@@ -113,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
                             ": Default=" + defaultLevel +
                             ", Max=" + maxLevel;
                     mFlashCameraInfoList.add(info);
+                    mFlashStrengthMaxList.add(maxLevel);
                     Log.i("Camera info", info);
 //                    buffer.append(info).append('\n');
 
@@ -125,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
 
 
             TextView tv = findViewById(R.id.flashInfo);
-//            tv.setText(buffer);
             tv.setText(R.string.info);
 
             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, mFlashCameraInfoList);
@@ -134,10 +127,7 @@ public class MainActivity extends AppCompatActivity {
             cameraSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                    if (position > 0 && position <= mFlashCameraIdList.size())
-//                        changeCameraId(mFlashCameraIdList.get(position-1));
-                    if (position >= 0 && position < mFlashCameraIdList.size())
-                        changeCameraId(mFlashCameraIdList.get(position));
+                    changeCameraId(position);
                 }
 
                 @Override
@@ -176,9 +166,10 @@ public class MainActivity extends AppCompatActivity {
             };
             Handler handler = new Handler(getMainLooper());
             mCameraManager.registerTorchCallback(torchCallback, handler);
+            tvProgress.setOnClickListener(v -> changeLightLevel());
 
-//            if (bestCameraIndex >= 0)
-//                cameraSelector.setSelection(bestCameraIndex);
+            if (bestCameraIndex >= 0)
+                cameraSelector.setSelection(bestCameraIndex);
 
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -187,21 +178,28 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void changeCameraId(String id) {
-        if (!mFlashCameraIdList.contains(id))
+    private void changeCameraId(int position) {
+
+        if (position < 0 && position >= mFlashCameraIdList.size())
             return;
+
         try {
-            int maxLevel = 0;
-            CameraCharacteristics pc = mCameraManager.getCameraCharacteristics(id);
-            if (pc.get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL) != null) {
-                maxLevel = pc.get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL);
-            }
-            if(null!=cameraId)
+            String id = mFlashCameraIdList.get(position);
+            maxLightLevel = mFlashStrengthMaxList.get(position);
+            if (null != cameraId)
                 mCameraManager.setTorchMode(cameraId, false);
             cameraId = id;
 
-            seekBar.setMax(maxLevel);
+            seekBar.setMax(maxLightLevel);
             seekBar.setProgress(0);
+            if (maxLightLevel < 1)
+                tvProgress.setText(R.string.not_support);
+            else if (maxLightLevel == 1)
+                tvProgress.setText(R.string.may_not_support);
+            else
+                tvProgress.setText(R.string.off);
+
+
         } catch (CameraAccessException e) {
             throw new RuntimeException(e);
         }
@@ -210,6 +208,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private int lightLevel = 0;
+    private int maxLightLevel = 0;
+
+    private void changeLightLevel() {
+        int v = (lightLevel + 1) % (maxLightLevel + 1);
+        changeLightLevel(v, true, true, cameraId);
+    }
 
     private void changeLightLevel(int v, boolean updateManager, boolean updateUI) {
         changeLightLevel(v, updateManager, updateUI, cameraId);
@@ -222,7 +226,6 @@ public class MainActivity extends AppCompatActivity {
         if (v == lightLevel)
             return;
         lightLevel = v;
-
 
         if (updateManager) {
             try {
@@ -237,11 +240,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (updateUI) {
-            if (v > 0) {
+            if (v > 0)
                 tvProgress.setText("" + v);
-            } else {
+            else if (maxLightLevel < 1)
+                tvProgress.setText(R.string.not_support);
+            else if (maxLightLevel == 1)
+                tvProgress.setText(R.string.may_not_support);
+            else
                 tvProgress.setText(R.string.off);
-            }
+
             seekBar.setProgress(v);
         }
 

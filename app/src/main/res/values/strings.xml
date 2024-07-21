@@ -3,4 +3,6 @@
     <string name="off">Off</string>
     <string name="info">In devices with Android 13 or higher, the system (may) provide an API to control the strength of the flashlight. This is a simple demo app that uses this feature. You can select the flashlight by pulling down and select the brightness of the flashlight by sliding the seekbar. If your device does not support this feature, you cannot turn on the flashlight through this app. \nReference document https://source.android.google.cn/docs/core/camera/torch-strength-control\n\nby tumuyan in 2024.7
 </string>
+    <string name="not_support">This flash not support strength control</string>
+    <string name="may_not_support">Off\nThis flash may not support strength control</string>
 </resources>
